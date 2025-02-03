@@ -5,6 +5,7 @@ using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using HelixToolkit.Wpf;
 using Microsoft.Win32;
+using System.IO;
 
 namespace _3dApp;
 
@@ -16,18 +17,12 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        // Load3DModel(modelPath);
     }
 
-    private void LoadModelButton_Click(object sender, RoutedEventArgs routedEventArgs)
+    private void Load3DModel(string filePath)
     {
-        var openFileDialog = new OpenFileDialog
-        {
-            Title = "Select a 3D Model",
-            Filter = "3D Model Files (*.obj;*.stl;*.3ds;*.ply)|*.obj;*.stl;*.3ds;*.ply|All Files (*.*)|*.*"
-        };
-
-        if (openFileDialog.ShowDialog() != true) return;
-        var filePath = openFileDialog.FileName;
+        ArgumentNullException.ThrowIfNull(filePath);
         var importer = new ModelImporter();
 
         ProgressBar.Visibility = Visibility.Visible;
@@ -51,5 +46,18 @@ public partial class MainWindow : Window
         {
             ProgressBar.Visibility = Visibility.Collapsed;
         }
+    }
+
+    private void LoadModelButton_Click(object sender, RoutedEventArgs routedEventArgs)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Title = "Select a 3D Model",
+            Filter = "3D Model Files (*.obj;*.stl;*.3ds;*.ply)|*.obj;*.stl;*.3ds;*.ply|All Files (*.*)|*.*"
+        };
+
+        if (openFileDialog.ShowDialog() != true) return;
+        var filePath = openFileDialog.FileName;
+        Load3DModel(filePath);
     }
 }
