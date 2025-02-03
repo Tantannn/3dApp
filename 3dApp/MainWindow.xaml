@@ -1,0 +1,34 @@
+﻿<Window x:Class="_3dApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:helix="http://helix-toolkit.org/wpf"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <helix:HelixViewport3D x:Name="HelixViewport3D" >
+            <!-- Camera -->
+            <helix:HelixViewport3D.Camera>
+                <PerspectiveCamera Position="0, 0, 5" LookDirection="0, 0, -1" UpDirection="0, 1, 0" FieldOfView="45" />
+            </helix:HelixViewport3D.Camera>
+
+            <!-- Lighting -->
+            <helix:DefaultLights />
+            <!-- <ModelVisual3D x:Name="ModelContainer"/> -->
+        </helix:HelixViewport3D>
+        <StackPanel >
+            <Menu VerticalAlignment="Top">
+                <MenuItem Header="File">
+                    <MenuItem Click="LoadModelButton_Click" Header="Open File" />
+                    <!-- <MenuItem Command="{Binding ExportCommand}" Header="Export" /> -->
+                </MenuItem>
+                <!-- <MenuItem Header="Edit"> -->
+                <!--     <MenuItem Command="{Binding CopyAsBitmapCommand}" Header="Copy As Bitmap (Window Size)" /> -->
+                <!--     <MenuItem Command="{Binding CopyAsHiresBitmapCommand}" Header="Copy as Hiresolution Bitmap (1920x1080)" /> -->
+                <!-- </MenuItem> -->
+            </Menu>
+        </StackPanel>
+            <ProgressBar Name="ProgressBar" Width="200" Height="30" IsIndeterminate="True" Visibility="Collapsed" />
+    </Grid>
+</Window>
