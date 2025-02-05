@@ -15,7 +15,6 @@
 
             <!-- Lighting -->
             <helix:DefaultLights />
-            <!-- <ModelVisual3D x:Name="ModelContainer"/> -->
         </helix:HelixViewport3D>
         <StackPanel >
             <Menu VerticalAlignment="Top">
