@@ -53,11 +53,65 @@ public partial class MainWindow : Window
         var openFileDialog = new OpenFileDialog
         {
             Title = "Select a 3D Model",
-            Filter = "3D Model Files (*.obj;*.stl;*.3ds;*.ply)|*.obj;*.stl;*.3ds;*.ply|All Files (*.*)|*.*"
+            Filter = "3D Model Files (*.obj;*.stl;*.3ds;*.ply;*.gltf)|*.obj;*.stl;*.3ds;*.ply;*.gltf|All Files (*.*)|*.*"
         };
 
         if (openFileDialog.ShowDialog() != true) return;
         var filePath = openFileDialog.FileName;
         Load3DModel(filePath);
     }
+
+    private void SaveModelButton_Click(object sender, RoutedEventArgs e)
+    {
+        var saveFileDialog = new SaveFileDialog
+        {
+            Title = "Save 3D Model",
+            Filter = "Wavefront OBJ (*.obj)|*.obj|All Files (*.*)|*.*"
+        };
+
+        if (saveFileDialog.ShowDialog() != true) return;
+
+        var filePath = saveFileDialog.FileName;
+        Save3DModel(filePath);
+    }
+
+        private void Save3DModel(string filePath)
+        {
+            if (HelixViewport3D.Children.Count == 0)
+            {
+                MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Find the ModelVisual3D in HelixViewport3D's children
+            var modelVisual = HelixViewport3D.Children.OfType<ModelVisual3D>().FirstOrDefault();
+
+            if (modelVisual?.Content == null)
+            {
+                MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (modelVisual.Content is not { } model)
+            {
+                MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var exporter = new ObjExporter();
+
+            try
+            {
+                using (var stream = File.Create(filePath))
+                {
+                    exporter.Export(model, stream);
+                }
+
+                MessageBox.Show("Model saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving model: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 }
