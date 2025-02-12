@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <helix:HelixViewport3D x:Name="HelixViewport3D" >
+        <helix:HelixViewport3D x:Name="HelixViewport3D" ShowCameraInfo="True" ZoomExtentsWhenLoaded="True"  MouseDown="Viewport_MouseDown">
             <!-- Camera -->
             <helix:HelixViewport3D.Camera>
                 <PerspectiveCamera Position="0, 0, 5" LookDirection="0, 0, -1" UpDirection="0, 1, 0" FieldOfView="45" />

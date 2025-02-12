@@ -114,4 +114,14 @@ public partial class MainWindow : Window
                 MessageBox.Show($"Error saving model: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        private void Viewport_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var mousePosition = e.GetPosition(HelixViewport3D);
+            var result = VisualTreeHelper.HitTest(HelixViewport3D, mousePosition);
+            
+            if (result is RayMeshGeometry3DHitTestResult { ModelHit: GeometryModel3D geometryModel })
+            {
+                geometryModel.Material = new DiffuseMaterial(new SolidColorBrush(Colors.Red));
+            }
+        }
 }
