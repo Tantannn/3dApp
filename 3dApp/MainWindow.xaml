@@ -7,6 +7,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <!-- <TextBox x:Name="ColorInputBox" Width="120" Height="30" Text="#FF0000" -->
+        <!--          ToolTip="Enter Hex Color (e.g., #FF5733)" /> -->
+        <!-- <Button Content="Apply Color" Width="120" Height="30" Click="ApplyColorButton_Click" /> -->
         <helix:HelixViewport3D x:Name="HelixViewport3D" ShowCameraInfo="True" ZoomExtentsWhenLoaded="True"  MouseDown="Viewport_MouseDown">
             <!-- Camera -->
             <helix:HelixViewport3D.Camera>
@@ -21,6 +24,7 @@
                 <MenuItem Header="File">
                     <MenuItem Click="LoadModelButton_Click" Header="Open File" />
                     <MenuItem Click="SaveModelButton_Click" Header="Save File" />
+                    <MenuItem Click="OpenColorInputWindow" Header="Choose Color" />
                 </MenuItem>
                 <!-- <MenuItem Header="Edit"> -->
                 <!--     <MenuItem Command="{Binding CopyAsBitmapCommand}" Header="Copy As Bitmap (Window Size)" /> -->
@@ -28,6 +32,6 @@
                 <!-- </MenuItem> -->
             </Menu>
         </StackPanel>
-            <ProgressBar Name="ProgressBar" Width="200" Height="30" IsIndeterminate="True" Visibility="Collapsed" />
+        <ProgressBar Name="ProgressBar" Width="200" Height="30" IsIndeterminate="True" Visibility="Collapsed" />
     </Grid>
 </Window>

@@ -19,6 +19,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         // Load3DModel(modelPath);
     }
+    // private Color? _selectedColor;
+    private GeometryModel3D _selectedModel;
+    private System.Windows.Media.Color _selectedColor = Colors.White; 
 
     private void Load3DModel(string filePath)
     {
@@ -121,7 +124,29 @@ public partial class MainWindow : Window
             
             if (result is RayMeshGeometry3DHitTestResult { ModelHit: GeometryModel3D geometryModel })
             {
-                geometryModel.Material = new DiffuseMaterial(new SolidColorBrush(Colors.Red));
+                geometryModel.Material = new DiffuseMaterial(new SolidColorBrush(_selectedColor));
             }
         }
+
+    private void OpenColorInputWindow(object sender, RoutedEventArgs e)
+    {
+        var colorWindow = new Color();
+        if (colorWindow.ShowDialog() == true) // Wait for user input
+        {
+            try
+            {
+                _selectedColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(colorWindow.SelectedColor);
+            
+                // Apply color if a model is already selected
+                if (_selectedModel != null)
+                {
+                    _selectedModel.Material = new DiffuseMaterial(new SolidColorBrush(_selectedColor));
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid color format! Use #RRGGBB.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
 }
