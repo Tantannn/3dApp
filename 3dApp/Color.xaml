@@ -5,11 +5,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:_3dApp"
         mc:Ignorable="d"
-        Title="Color" Height="200" Width="200">
+        Title="Color" Height="130" Width="200">
     <Grid>
         <StackPanel Margin="10">
             <TextBlock Text="Enter Hex Color (#RRGGBB):" Margin="5" />
-            <TextBox x:Name="ColorInputBox" Width="100" Height="30" Text="#FF0000" />
+            <TextBox x:Name="ColorInputBox" Width="100" Height="30" Margin="2 10 " Text="#FF0000" />
             <Button Content="Apply Color" Width="150" Height="30" Click="ApplyColor_Click" />
         </StackPanel>
     </Grid>
