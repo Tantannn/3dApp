@@ -136,12 +136,7 @@ public partial class MainWindow : Window
             try
             {
                 _selectedColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(colorWindow.SelectedColor);
-            
-                // Apply color if a model is already selected
-                if (_selectedModel != null)
-                {
-                    _selectedModel.Material = new DiffuseMaterial(new SolidColorBrush(_selectedColor));
-                }
+                _selectedModel.Material = new DiffuseMaterial(new SolidColorBrush(_selectedColor));
             }
             catch (FormatException)
             {
