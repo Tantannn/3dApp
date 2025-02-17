@@ -20,8 +20,10 @@ public partial class MainWindow : Window
         // Load3DModel(modelPath);
     }
     // private Color? _selectedColor;
-    private GeometryModel3D _selectedModel;
-    private System.Windows.Media.Color _selectedColor = Colors.White; 
+    public GeometryModel3D? SelectedModel;
+    private System.Windows.Media.Color _selectedColor = Colors.White;
+    private bool _doesClickChangeColor = false;
+    private Model3DGroup? _originalModelVisual3D;
 
     private void Load3DModel(string filePath)
     {
@@ -32,6 +34,7 @@ public partial class MainWindow : Window
         try
         {
             var models = importer.Load(filePath);
+            _originalModelVisual3D = models;
             HelixViewport3D.Children.Clear();
 
             var modelVisual = new ModelVisual3D { Content = models };
@@ -119,6 +122,7 @@ public partial class MainWindow : Window
         }
         private void Viewport_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (!_doesClickChangeColor) return;
             var mousePosition = e.GetPosition(HelixViewport3D);
             var result = VisualTreeHelper.HitTest(HelixViewport3D, mousePosition);
             
@@ -131,17 +135,65 @@ public partial class MainWindow : Window
     private void OpenColorInputWindow(object sender, RoutedEventArgs e)
     {
         var colorWindow = new Color();
-        if (colorWindow.ShowDialog() == true) // Wait for user input
+        if (colorWindow.ShowDialog() != true) return;
+        try
         {
-            try
+            _selectedColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(colorWindow.SelectedColor);
+            if (SelectedModel != null)
+                SelectedModel.Material = new DiffuseMaterial(new SolidColorBrush(_selectedColor));
+        }
+        catch (FormatException)
+        {
+            MessageBox.Show("Invalid color format! Use #RRGGBB.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void EnableChangeColor_Click(object sender, RoutedEventArgs e)
+    {
+        EnableDisableMenuItem.Header = _doesClickChangeColor ? "Enable Click" : "Disable Click";
+
+        _doesClickChangeColor = !_doesClickChangeColor;
+    }
+
+    private void ResetColor_Click(object sender, RoutedEventArgs e)
+    {
+        if (_originalModelVisual3D == null) return;
+
+        // Create a new Model3DGroup with deep copies of the GeometryModel3D instances
+        var resetModel = DeepCopyModel(_originalModelVisual3D);
+
+        HelixViewport3D.Children.Clear();
+
+        var modelVisual = new ModelVisual3D { Content = resetModel };
+        HelixViewport3D.Children.Add(modelVisual);
+        var light = new DirectionalLight(Colors.White, new Vector3D(-1, -1, -1));
+        resetModel.Children.Add(light);
+    }
+
+    // Helper method for deep copying Model3DGroup
+    private Model3DGroup DeepCopyModel(Model3DGroup original)
+    {
+        var newGroup = new Model3DGroup();
+        foreach (var child in original.Children)
+        {
+            if (child is GeometryModel3D geometryModel)
             {
-                _selectedColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(colorWindow.SelectedColor);
-                _selectedModel.Material = new DiffuseMaterial(new SolidColorBrush(_selectedColor));
+                // Create a new GeometryModel3D with a new material
+                var newGeometryModel = new GeometryModel3D
+                {
+                    Geometry = geometryModel.Geometry,
+                    Material = new DiffuseMaterial(new SolidColorBrush(Colors.White)), // Ensure you have a new material
+                    BackMaterial = geometryModel.BackMaterial,
+                    Transform = geometryModel.Transform
+                };
+                newGroup.Children.Add(newGeometryModel);
             }
-            catch (FormatException)
+            else if (child is Model3DGroup group)
             {
-                MessageBox.Show("Invalid color format! Use #RRGGBB.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Recursively copy nested groups
+                newGroup.Children.Add(DeepCopyModel(group));
             }
         }
+        return newGroup;
     }
 }

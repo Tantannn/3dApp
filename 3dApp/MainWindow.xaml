@@ -23,13 +23,14 @@
             <Menu VerticalAlignment="Top">
                 <MenuItem Header="File">
                     <MenuItem Click="LoadModelButton_Click" Header="Open File" />
-                    <MenuItem Click="SaveModelButton_Click" Header="Save File" />
-                    <MenuItem Click="OpenColorInputWindow" Header="Choose Color" />
+                    <MenuItem IsEnabled="false" Click="SaveModelButton_Click" Header="Save File" />
                 </MenuItem>
-                <!-- <MenuItem Header="Edit"> -->
-                <!--     <MenuItem Command="{Binding CopyAsBitmapCommand}" Header="Copy As Bitmap (Window Size)" /> -->
-                <!--     <MenuItem Command="{Binding CopyAsHiresBitmapCommand}" Header="Copy as Hiresolution Bitmap (1920x1080)" /> -->
-                <!-- </MenuItem> -->
+                <MenuItem Header="Color">
+                    <MenuItem x:Name="EnableDisableMenuItem" Click="EnableChangeColor_Click" Header="Enable Click" />
+                    <MenuItem Click="OpenColorInputWindow" Header="Choose Color" />
+                    <MenuItem Click="ResetColor_Click" IsEnabled="false" Header="Reset Color" />
+                    <!-- <MenuItem Command="{Binding CopyAsHiresBitmapCommand}" Header="Copy as Hiresolution Bitmap (1920x1080)" /> -->
+                </MenuItem>
             </Menu>
         </StackPanel>
         <ProgressBar Name="ProgressBar" Width="200" Height="30" IsIndeterminate="True" Visibility="Collapsed" />
