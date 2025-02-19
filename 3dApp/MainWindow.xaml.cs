@@ -134,7 +134,7 @@ public partial class MainWindow : Window
 
     private void OpenColorInputWindow(object sender, RoutedEventArgs e)
     {
-        var colorWindow = new Color();
+        var colorWindow = new PickColorWindow();
         if (colorWindow.ShowDialog() != true) return;
         try
         {

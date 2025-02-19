@@ -2,10 +2,10 @@
 
 namespace _3dApp;
 
-public partial class Color : Window
+public partial class PickColorWindow : Window
 {
     public string? SelectedColor { get; set; }
-    public Color()
+    public PickColorWindow()
     {
         InitializeComponent();
 
