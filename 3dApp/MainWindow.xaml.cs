@@ -19,11 +19,12 @@ public partial class MainWindow : Window
         InitializeComponent();
         // Load3DModel(modelPath);
     }
+
     // private Color? _selectedColor;
     public GeometryModel3D? SelectedModel;
     private System.Windows.Media.Color _selectedColor = Colors.White;
     private bool _doesClickChangeColor = false;
-    private Model3DGroup? _originalModelVisual3D;
+    private Model3DGroup _originalModelVisual3D;
 
     private void Load3DModel(string filePath)
     {
@@ -59,7 +60,8 @@ public partial class MainWindow : Window
         var openFileDialog = new OpenFileDialog
         {
             Title = "Select a 3D Model",
-            Filter = "3D Model Files (*.obj;*.stl;*.3ds;*.ply;*.gltf)|*.obj;*.stl;*.3ds;*.ply;*.gltf|All Files (*.*)|*.*"
+            Filter =
+                "3D Model Files (*.obj;*.stl;*.3ds;*.ply;*.gltf)|*.obj;*.stl;*.3ds;*.ply;*.gltf|All Files (*.*)|*.*"
         };
 
         if (openFileDialog.ShowDialog() != true) return;
@@ -81,56 +83,57 @@ public partial class MainWindow : Window
         Save3DModel(filePath);
     }
 
-        private void Save3DModel(string filePath)
+    private void Save3DModel(string filePath)
+    {
+        if (HelixViewport3D.Children.Count == 0)
         {
-            if (HelixViewport3D.Children.Count == 0)
-            {
-                MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            // Find the ModelVisual3D in HelixViewport3D's children
-            var modelVisual = HelixViewport3D.Children.OfType<ModelVisual3D>().FirstOrDefault();
-
-            if (modelVisual?.Content == null)
-            {
-                MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (modelVisual.Content is not { } model)
-            {
-                MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            var exporter = new ObjExporter();
-
-            try
-            {
-                using (var stream = File.Create(filePath))
-                {
-                    exporter.Export(model, stream);
-                }
-
-                MessageBox.Show("Model saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error saving model: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
         }
-        private void Viewport_MouseDown(object sender, MouseButtonEventArgs e)
+
+        // Find the ModelVisual3D in HelixViewport3D's children
+        var modelVisual = HelixViewport3D.Children.OfType<ModelVisual3D>().FirstOrDefault();
+
+        if (modelVisual?.Content == null)
         {
-            if (!_doesClickChangeColor) return;
-            var mousePosition = e.GetPosition(HelixViewport3D);
-            var result = VisualTreeHelper.HitTest(HelixViewport3D, mousePosition);
-            
-            if (result is RayMeshGeometry3DHitTestResult { ModelHit: GeometryModel3D geometryModel })
-            {
-                geometryModel.Material = new DiffuseMaterial(new SolidColorBrush(_selectedColor));
-            }
+            MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
         }
+
+        if (modelVisual.Content is not { } model)
+        {
+            MessageBox.Show("No model to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var exporter = new ObjExporter();
+
+        try
+        {
+            using (var stream = File.Create(filePath))
+            {
+                exporter.Export(model, stream);
+            }
+
+            MessageBox.Show("Model saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error saving model: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void Viewport_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!_doesClickChangeColor) return;
+        var mousePosition = e.GetPosition(HelixViewport3D);
+        var result = VisualTreeHelper.HitTest(HelixViewport3D, mousePosition);
+
+        if (result is RayMeshGeometry3DHitTestResult { ModelHit: GeometryModel3D geometryModel })
+        {
+            geometryModel.Material = new DiffuseMaterial(new SolidColorBrush(_selectedColor));
+        }
+    }
 
     private void OpenColorInputWindow(object sender, RoutedEventArgs e)
     {
@@ -159,41 +162,46 @@ public partial class MainWindow : Window
     {
         if (_originalModelVisual3D == null) return;
 
-        // Create a new Model3DGroup with deep copies of the GeometryModel3D instances
+        // Create a deep copy of the original model
         var resetModel = DeepCopyModel(_originalModelVisual3D);
 
         HelixViewport3D.Children.Clear();
 
         var modelVisual = new ModelVisual3D { Content = resetModel };
         HelixViewport3D.Children.Add(modelVisual);
+
+        // Re-add the light
         var light = new DirectionalLight(Colors.White, new Vector3D(-1, -1, -1));
-        resetModel.Children.Add(light);
+        HelixViewport3D.Children.Add(new ModelVisual3D { Content = light });
     }
 
-    // Helper method for deep copying Model3DGroup
-    private Model3DGroup DeepCopyModel(Model3DGroup original)
+    private Model3DGroup DeepCopyModel(Model3DGroup originalModel)
     {
-        var newGroup = new Model3DGroup();
-        foreach (var child in original.Children)
+        if (originalModel == null) return null;
+
+        var newModel = new Model3DGroup();
+        foreach (var child in originalModel.Children)
         {
             if (child is GeometryModel3D geometryModel)
             {
-                // Create a new GeometryModel3D with a new material
                 var newGeometryModel = new GeometryModel3D
                 {
-                    Geometry = geometryModel.Geometry,
-                    Material = new DiffuseMaterial(new SolidColorBrush(Colors.White)), // Ensure you have a new material
-                    BackMaterial = geometryModel.BackMaterial,
-                    Transform = geometryModel.Transform
+                    Geometry = geometryModel.Geometry.Clone(),
+                    Material = geometryModel.Material.Clone(),
+                    BackMaterial = geometryModel.BackMaterial?.Clone()
                 };
-                newGroup.Children.Add(newGeometryModel);
+                newModel.Children.Add(newGeometryModel);
             }
             else if (child is Model3DGroup group)
             {
-                // Recursively copy nested groups
-                newGroup.Children.Add(DeepCopyModel(group));
+                newModel.Children.Add(DeepCopyModel(group));
+            }
+            else
+            {
+                newModel.Children.Add(child.Clone());
             }
         }
-        return newGroup;
+
+        return newModel;
     }
 }
